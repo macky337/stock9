@@ -1,0 +1,7 @@
+yfinance
+streamlit
+matplotlib.pyplot
+pandas_datareader
+datetime
+timedelta
+matplotlib.dates
