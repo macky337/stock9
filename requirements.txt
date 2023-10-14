@@ -1,6 +1,6 @@
 yfinance
 streamlit
-matplotlib.pyplot
+matplotlib
 pandas_datareader
 datetime
 timedelta
