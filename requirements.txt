@@ -4,4 +4,4 @@ matplotlib
 pandas_datareader
 datetime
 timedelta
-matplotlib.dates
+matplotlib
