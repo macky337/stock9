@@ -9,7 +9,7 @@ import matplotlib.dates as mdates
 st.title('Stock Price App')
 
 # Sidebar: User Input
-selected_stock = st.sidebar.text_input("Enter stock symbols (comma separated):", "AAPL,MSFT,GOOGL,AMZN,META,TSLA,NVDA,NFLX,BA")
+selected_stock = st.sidebar.text_input("Enter stock symbols (comma separated):", "AAPL,MSFT,GOOGL,AMZN,META,TSLA,NVDA,NFLX,ARM")
 time_frame = st.sidebar.selectbox("Select Time Frame", ["1d", "1wk", "1mo"])
 period = st.sidebar.selectbox("Select Period", ["3M", "6M", "1Y", "3Y", "5Y", "10Y"])
 moving_averages = st.sidebar.multiselect("Select Moving Averages", ["5D", "25D", "75D", "200D"])
