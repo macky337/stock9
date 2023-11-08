@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import matplotlib.dates as mdates
 
 # Streamlit UI
-st.title('株価アプリ')
+st.title('stock9_chart')
 
 # サイドバー: ユーザー入力
 selected_stock = st.sidebar.text_input("銘柄をカンマ区切りで入力してください（例: AAPL,MSFT,GOOGL,AMZN,META,TSLA,NVDA,CRWD,ARM）", "AAPL,MSFT,GOOGL,AMZN,META,TSLA,NVDA,CRWD,ARM")
