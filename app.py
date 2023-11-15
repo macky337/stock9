@@ -9,7 +9,7 @@ import matplotlib.dates as mdates
 st.title('stock9_chart')
 
 # サイドバー: ユーザー入力
-selected_stock = st.sidebar.text_input("銘柄をカンマ区切りで入力してください（例: AAPL,MSFT,GOOGL,AMZN,META,TSLA,NVDA,CRWD,ARM）", "AAPL,MSFT,GOOGL,AMZN,META,TSLA,NVDA,CRWD,ARM")
+selected_stock = st.sidebar.text_input("銘柄をカンマ区切りで入力してください", "AAPL,MSFT,GOOGL,AMZN,META,TSLA,NVDA,CRWD,ARM")
 time_frame = st.sidebar.selectbox("タイムフレームを選択", ["1d", "1wk", "1mo"])
 period = st.sidebar.selectbox("期間を選択", ["3M", "6M", "1Y", "3Y", "5Y", "10Y"])
 moving_averages = st.sidebar.multiselect("移動平均を選択", ["5D", "25D", "75D", "200D"])
