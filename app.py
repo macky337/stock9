@@ -6,19 +6,19 @@ from datetime import datetime, timedelta
 import matplotlib.dates as mdates
 
 # Streamlit UI
-st.title('Stock Price App')
+st.title('stock9_chart')
 
-# Sidebar: User Input
-selected_stock = st.sidebar.text_input("Enter stock symbols (comma separated):", "AAPL,MSFT,GOOGL,AMZN,META,TSLA,NVDA,NFLX,BA")
-time_frame = st.sidebar.selectbox("Select Time Frame", ["1d", "1wk", "1mo"])
-period = st.sidebar.selectbox("Select Period", ["3M", "6M", "1Y", "3Y", "5Y", "10Y"])
-moving_averages = st.sidebar.multiselect("Select Moving Averages", ["5D", "25D", "75D", "200D"])
-display_mode = st.sidebar.selectbox("Select Display Mode", ["Single", "Multiple"])
+# サイドバー: ユーザー入力
+selected_stock = st.sidebar.text_input("銘柄ティッカーを入力してください", "AAPL,goog,meta,amzn,arm,amd,intc,crwd,nvda")
+time_frame = st.sidebar.selectbox("タイムフレームを選択", ["1d", "1wk", "1mo"])
+period = st.sidebar.selectbox("期間を選択", ["3M", "6M", "1Y", "3Y", "5Y", "10Y"])
+moving_averages = st.sidebar.multiselect("移動平均を選択", ["5D", "25D", "75D", "200D"])
+display_mode = st.sidebar.selectbox("表示モードを選択", ["Single", "Multiple"])
 
-# Get Data & Plotting
+# データ取得 & プロット
 symbols = selected_stock.split(',')
 
-# Period to datetime mapping
+# 期間をdatetimeに変換
 period_mapping = {
     "3M": timedelta(days=90),
     "6M": timedelta(days=180),
@@ -35,39 +35,55 @@ def plot_chart(ax, symbol, period, time_frame, moving_averages):
         else:
             df = yf.download(symbol, start=datetime.now()-period_mapping[period], interval=time_frame)
 
-        ax.plot(df['Close'], label=symbol)
-        ax.set_title(symbol, fontsize=14)
+        ax.plot(df['Close'], label='終値')
+
+        # 最終終値とその日付を取得
+        last_date = df.index[-1]
+        last_close = df['Close'].iloc[-1]
+
+        # 前日の終値を取得
+        if len(df) > 1:
+            previous_close = df['Close'].iloc[-2]
+        else:
+            previous_close = last_close
+
+        # 前日比を計算
+        change = last_close - previous_close
+        percent_change = (change / previous_close) * 100 if previous_close != 0 else 0
+
+        # 移動平均の計算と描画
+        for ma in moving_averages:
+            if len(df) >= int(ma[:-1]):  # データが十分にあるか確認
+                df['MA' + ma] = df['Close'].rolling(window=int(ma[:-1])).mean()
+                ax.plot(df['MA' + ma], label=f'{ma} 移動平均')
+
+        # 終値と前日比を注釈としてチャートに表示
+        ax.annotate(f'{last_close:.2f}\n({change:+.2f}, {percent_change:+.2f}%)',
+                    xy=(last_date, last_close),
+                    xytext=(15, 0),
+                    textcoords='offset points',
+                    arrowprops=dict(arrowstyle='->'),
+                    horizontalalignment='right',
+                    verticalalignment='bottom',
+                    fontsize=8)
+
+        # タイトルに終値と前日比を追加
+        ax.set_title(f"{symbol} {last_close:.2f} ({change:+.2f}, {percent_change:+.2f}%)", fontsize=14)
         ax.legend(loc='upper left')
         ax.get_xaxis().set_visible(True)
-        
-        if period in ["3M", "6M"]:
-            ax.xaxis.set_major_locator(mdates.MonthLocator())
-        elif period == "1Y":
-            ax.xaxis.set_major_locator(mdates.MonthLocator(interval=3))
-        elif period == "10Y":
-            ax.xaxis.set_major_locator(mdates.YearLocator())
-        else:
-            ax.xaxis.set_major_locator(mdates.MonthLocator(interval=6))
-        
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%y-%m-%d'))
+
+        # X軸の日付フォーマットを設定
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
         plt.setp(ax.xaxis.get_majorticklabels(), rotation=45)
 
-        for ma in moving_averages:
-            df[ma] = df['Close'].rolling(window=int(ma[:-1])).mean()
-            ax.plot(df[ma], label=f"{ma} MA")
-        
-        ax2 = ax.twinx()
-        ax2.fill_between(df.index, df['Volume'], alpha=0.1, label='Volume')
-        ax2.legend(loc='upper right')
-        ax2.get_yaxis().set_visible(False)
-        
-        st.sidebar.text(f"Loaded: {symbol}")
     except Exception as e:
-        st.sidebar.text(f"Error: {symbol} - {str(e)}")
+        st.sidebar.text(f"エラー: {symbol} - {str(e)}")
 
 
 if display_mode == "Single":
-    symbol = st.sidebar.selectbox("Select a symbol to display", symbols)
+    # インデントされたコードブロック
+    # 例えば、シングル表示モード用の処理
+    symbol = st.sidebar.selectbox("銘柄を選択", symbols)
     symbol = symbol.strip().upper()
 
     fig, ax1 = plt.subplots(figsize=(12, 6))
@@ -75,18 +91,16 @@ if display_mode == "Single":
     plt.tight_layout()
     st.pyplot(fig)
 else:
-    if len(symbols) > 9:
-        st.sidebar.text("Please enter up to 9 symbols only.")
-    else:
-        fig, axs = plt.subplots(3, 3, figsize=(18, 12))
-        fig.suptitle('Stock Prices and Volume', fontsize=20)
-        axs = axs.flatten()
+    # インデントされたコードブロック
+    # 例えば、マルチプル表示モード用の処理
+    fig, axs = plt.subplots(3, 3, figsize=(18, 12))
+    fig.suptitle('株価とボリューム', fontsize=20)
+    axs = axs.flatten()
 
-        for i, symbol in enumerate(symbols):
-            symbol = symbol.strip().upper()
-            plot_chart(axs[i], symbol, period, time_frame, moving_averages)
+    # 各銘柄のチャートをプロットする処理
+    for i, symbol in enumerate(symbols):
+        symbol = symbol.strip().upper()
+        plot_chart(axs[i], symbol, period, time_frame, moving_averages)
 
-        plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-        st.pyplot(fig)
-
-    st.sidebar.text("Note: Add '.JP' for Japanese stocks.")
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    st.pyplot(fig)
