@@ -4,6 +4,16 @@ import matplotlib.pyplot as plt
 import pandas_datareader as pdr
 from datetime import datetime, timedelta
 import matplotlib.dates as mdates
+import matplotlib.font_manager as fm
+
+
+# 新しいフォントを指定
+font_path = r'C:\Users\user\AppData\Local\Microsoft\Windows\Fonts\ipaexg.ttf'  # フォントファイルへのパス
+font_prop = fm.FontProperties(fname=font_path)
+# plt.rcParams['font.family'] = font_prop.get_name()
+# plt.rcParams['font.family'] = 'ipaexg'
+plt.rcParams['font.family'] = 'Meiryo'
+
 
 # Streamlit UI
 st.title('stock9_chart')
