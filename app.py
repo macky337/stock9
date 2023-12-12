@@ -72,12 +72,12 @@ def plot_chart(ax, symbol, period, time_frame, moving_averages):
 
 if display_mode == "Single":
     symbol = st.sidebar.selectbox("銘柄を選択", symbols)
-    fig, ax1 = plt.subplots(figsize=(20, 10))
+    fig, ax1 = plt.subplots(figsize=(25, 12))  # シングル表示モードのサイズを大きく設定
     plot_chart(ax1, symbol, period, time_frame, moving_averages)
     plt.tight_layout()
     st.pyplot(fig)
 else:
-    fig, axs = plt.subplots(3, 3, figsize=(24, 15))  # 3x3のグリッドでサブプロットを作成
+    fig, axs = plt.subplots(3, 3, figsize=(30, 18))  # マルチプル表示モードのサイズを大きく設定
     fig.suptitle('株価とボリューム', fontsize=20)
     axs = axs.flatten()
 
