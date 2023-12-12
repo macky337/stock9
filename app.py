@@ -54,6 +54,14 @@ def plot_chart(ax, symbol, period, time_frame, moving_averages):
         ax2.set_ylabel('Volume')
         ax2.grid(False)
 
+        # 移動平均の計算と描画
+        for ma in moving_averages:
+            if len(df) >= int(ma[:-1]):  # データが十分にあるか確認
+                df['MA' + ma] = df['Close'].rolling(window=int(ma[:-1])).mean()
+                ax.plot(df['MA' + ma], label=f'{ma} 移動平均')
+
+        ax.legend(loc='upper left')
+
         # タイトルに銘柄名と終値を表示
         ax.set_title(f"{symbol} - 終値: {last_close:.2f}")
 
