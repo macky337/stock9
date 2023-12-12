@@ -18,7 +18,7 @@ plt.rcParams['font.family'] = 'Meiryo'
 # Streamlit UI
 st.title('stock9_chart')
 
-# サイドバー: ユーザー入力
+# サイドバー: ユーザー入力 test
 selected_stock = st.sidebar.text_input("銘柄ティッカーを入力してください", "AAPL,goog,meta,amzn,arm,amd,intc,crwd,nvda")
 time_frame = st.sidebar.selectbox("タイムフレームを選択", ["1d", "1wk", "1mo"])
 period = st.sidebar.selectbox("期間を選択", ["3M", "6M", "1Y", "3Y", "5Y", "10Y"])
