@@ -3,18 +3,15 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import pandas_datareader as pdr
 from datetime import datetime, timedelta
-import matplotlib.dates as mdates
 import matplotlib.font_manager as fm
-
 
 # 新しいフォントを指定
 font_path = r'C:\Users\user\AppData\Local\Microsoft\Windows\Fonts\ipaexg.ttf'  # フォントファイルへのパス
 font_prop = fm.FontProperties(fname=font_path)
 plt.rcParams['font.family'] = 'Meiryo'
 
-
 # Streamlit UI
-st.title('stock9_chart')
+st.title('Stock9_Chart')
 
 # サイドバー: ユーザー入力
 selected_stock = st.sidebar.text_input("銘柄ティッカーを入力してください", "AAPL,GOOG,META,AMZN,ARM,AMD,INTC,CRWD,NVDA")
@@ -43,10 +40,16 @@ def plot_chart(ax, symbol, period, time_frame, moving_averages):
         else:
             df = yf.download(symbol, start=datetime.now()-period_mapping[period], interval=time_frame)
 
-        # 終値を取得
-        last_close = df['Close'].iloc[-1]
+        # 整数インデックス列を追加
+        df.reset_index(inplace=True)
+        df['IntIndex'] = df.index    
 
-        ax.plot(df['Close'], label='終値')
+        # 終値を描画
+        ax.plot(df['IntIndex'], df['Close'], label='終値')
+
+        # X軸のラベルを日付に設定
+        ax.set_xticks(df['IntIndex'][::len(df)//10])  # X軸のラベル数を調整
+        ax.set_xticklabels([date.strftime('%Y-%m-%d') for date in df['Date'][::len(df)//10]], rotation=45)
 
         # 出来高をプロットするための新しい軸を作成
         ax2 = ax.twinx()
@@ -63,21 +66,20 @@ def plot_chart(ax, symbol, period, time_frame, moving_averages):
         ax.legend(loc='upper left')
 
         # タイトルに銘柄名と終値を表示
+        last_close = df['Close'].iloc[-1] if not df.empty else 0
         ax.set_title(f"{symbol} - 終値: {last_close:.2f}")
-
-        # ... (残りのプロットロジック)
 
     except Exception as e:
         st.sidebar.text(f"エラー: {symbol} - {str(e)}")
 
+# シングルまたはマルチプル表示モードに応じた処理
 if display_mode == "Single":
     symbol = st.sidebar.selectbox("銘柄を選択", symbols)
-    fig, ax1 = plt.subplots(figsize=(25, 12))  # シングル表示モードのサイズを大きく設定
+    fig, ax1 = plt.subplots(figsize=(25, 12))
     plot_chart(ax1, symbol, period, time_frame, moving_averages)
-    plt.tight_layout()
     st.pyplot(fig)
 else:
-    fig, axs = plt.subplots(3, 3, figsize=(30, 18))  # マルチプル表示モードのサイズを大きく設定
+    fig, axs = plt.subplots(3, 3, figsize=(30, 18))
     fig.suptitle('株価とボリューム', fontsize=20)
     axs = axs.flatten()
 
@@ -85,7 +87,7 @@ else:
         if i < 9:  # 最大9つのチャートを表示
             plot_chart(axs[i], symbol, period, time_frame, moving_averages)
         else:
-            axs[i].set_visible(False)  # 9つ以上のチャートは表示しない
+            axs[i].set_visible(False)
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     st.pyplot(fig)
