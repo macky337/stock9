@@ -72,14 +72,16 @@ def plot_chart(ax, symbol, period, time_frame, moving_averages):
     except Exception as e:
         st.sidebar.text(f"エラー: {symbol} - {str(e)}")
 
-# シングルまたはマルチプル表示モードに応じた処理
+# シングル表示モードの場合のフィギュアサイズを調整
 if display_mode == "Single":
     symbol = st.sidebar.selectbox("銘柄を選択", symbols)
-    fig, ax1 = plt.subplots(figsize=(25, 12))
+    fig, ax1 = plt.subplots(figsize=(30, 15))  # 幅と高さを大きく設定
     plot_chart(ax1, symbol, period, time_frame, moving_averages)
     st.pyplot(fig)
+
+# マルチプル表示モードの場合のフィギュアサイズを調整
 else:
-    fig, axs = plt.subplots(3, 3, figsize=(30, 18))
+    fig, axs = plt.subplots(3, 3, figsize=(40, 24))  # 幅と高さを大きく設定
     fig.suptitle('株価とボリューム', fontsize=20)
     axs = axs.flatten()
 
@@ -91,3 +93,4 @@ else:
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     st.pyplot(fig)
+
