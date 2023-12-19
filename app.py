@@ -65,9 +65,10 @@ def plot_chart(ax, symbol, period, time_frame, moving_averages):
 
         ax.legend(loc='upper left')
 
-        # タイトルに銘柄名と終値を表示
+        # タイトルに銘柄名と終値を表示（フォントサイズを3倍に設定）
         last_close = df['Close'].iloc[-1] if not df.empty else 0
-        ax.set_title(f"{symbol} - 終値: {last_close:.2f}")
+        ax.set_title(f"{symbol} - 終値: {last_close:.2f}", fontsize=30)  # または必要に応じて fontsize=36 に設定
+
 
     except Exception as e:
         st.sidebar.text(f"エラー: {symbol} - {str(e)}")
