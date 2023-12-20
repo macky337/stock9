@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import pandas_datareader as pdr
 from datetime import datetime, timedelta
 import matplotlib.font_manager as fm
+import pandas as pd
+
 
 # 新しいフォントを指定
 font_path = r'C:\Users\user\AppData\Local\Microsoft\Windows\Fonts\ipaexg.ttf'  # フォントファイルへのパス
@@ -32,6 +34,51 @@ period_mapping = {
     "5Y": timedelta(days=5*365),
     "10Y": timedelta(days=10*365),
 }
+
+# ... (上部のコードは変更なし)
+
+# 最新の株価データを格納するためのデータフレームを初期化
+latest_data = pd.DataFrame(columns=['銘柄名', '日付', '始値', '高値', '安値', '終値', '前日比', '出来高'])
+
+for symbol in symbols:
+    try:
+        # データの取得
+        if symbol.endswith('.JP'):
+            df = pdr.stooq.StooqDailyReader(symbols=symbol, start=datetime.now()-period_mapping[period]).read()
+        else:
+            df = yf.download(symbol, start=datetime.now()-period_mapping[period], interval=time_frame)
+
+        # デバッグ用のログ出力
+        if df.empty:
+            st.write(f"{symbol}: データが空です。")
+        else:
+            st.write(f"{symbol}: データが正常に取得されました。")
+            st.write(df.head())  # 最初の数行を出力
+
+        # 最新のデータを取得
+        if not df.empty:
+            latest_row = df.iloc[-1]
+            previous_close = df['Close'].iloc[-2] if len(df) > 1 else latest_row['Close']
+            latest_data = latest_data.append({
+                '銘柄名': symbol,
+                '日付': df.index[-1].strftime('%Y-%m-%d'),
+                '始値': latest_row['Open'],
+                '高値': latest_row['High'],
+                '安値': latest_row['Low'],
+                '終値': latest_row['Close'],
+                '前日比': latest_row['Close'] - previous_close,
+                '出来高': latest_row['Volume']
+            }, ignore_index=True)
+
+    except Exception as e:
+        st.sidebar.text(f"エラー: {symbol} - {str(e)}")
+
+# ... (プロットチャート関数と表示モードの設定は変更なし)
+
+# 最新の株価データの表を表示
+st.table(latest_data)
+
+
 
 def plot_chart(ax, symbol, period, time_frame, moving_averages):
     try:
@@ -95,3 +142,6 @@ else:
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     st.pyplot(fig)
 
+
+# 最新の株価データの表を表示
+st.table(latest_data)
