@@ -5,7 +5,7 @@ import pandas_datareader as pdr
 from datetime import datetime, timedelta
 import matplotlib.font_manager as fm
 import pandas as pd
-
+import traceback
 
 # 新しいフォントを指定
 font_path = r'C:\Users\user\AppData\Local\Microsoft\Windows\Fonts\ipaexg.ttf'  # フォントファイルへのパス
@@ -14,6 +14,17 @@ plt.rcParams['font.family'] = 'Meiryo'
 
 # Streamlit UI
 st.title('Stock9_Chart')
+
+def get_stock_data(symbol, period, time_frame):
+    try:
+        if symbol.endswith('.JP'):
+            return pdr.stooq.StooqDailyReader(symbols=symbol, start=datetime.now()-period_mapping[period]).read()
+        else:
+            return yf.download(symbol, start=datetime.now()-period_mapping[period], interval=time_frame)
+    except Exception as e:
+        st.sidebar.text(f"データ取得エラー: {symbol} - {str(e)}")
+        st.sidebar.text(traceback.format_exc())
+        return pd.DataFrame()
 
 # サイドバー: ユーザー入力
 selected_stock = st.sidebar.text_input("銘柄ティッカーを入力してください", "AAPL,GOOG,META,AMZN,ARM,AMD,INTC,CRWD,NVDA")
@@ -37,47 +48,29 @@ period_mapping = {
 
 # ... (上部のコードは変更なし)
 
-# 最新の株価データを格納するためのデータフレームを初期化
+# データ取得と表示
 latest_data = pd.DataFrame(columns=['銘柄名', '日付', '始値', '高値', '安値', '終値', '前日比', '出来高'])
+expected_columns = ['Open', 'High', 'Low', 'Close', 'Volume']
 
 for symbol in symbols:
-    try:
-        # データの取得
-        if symbol.endswith('.JP'):
-            df = pdr.stooq.StooqDailyReader(symbols=symbol, start=datetime.now()-period_mapping[period]).read()
-        else:
-            df = yf.download(symbol, start=datetime.now()-period_mapping[period], interval=time_frame)
+    df = get_stock_data(symbol, period, time_frame)
+# デバッグ用の型確認
+    st.write(f"latest_data の型: {type(latest_data)}")
+    if not df.empty and all(column in df.columns for column in expected_columns):
+        latest_row = df.iloc[-1]
+        previous_close = df['Close'].iloc[-2] if len(df) > 1 else latest_row['Close']
+        new_row = pd.DataFrame([{
+            '銘柄名': symbol,
+            '日付': df.index[-1].strftime('%Y-%m-%d'),
+            '始値': latest_row['Open'],
+            '高値': latest_row['High'],
+            '安値': latest_row['Low'],
+            '終値': latest_row['Close'],
+            '前日比': latest_row['Close'] - previous_close,
+            '出来高': latest_row['Volume']
+        }])
 
-        # デバッグ用のログ出力
-        if df.empty:
-            st.write(f"{symbol}: データが空です。")
-        else:
-            st.write(f"{symbol}: データが正常に取得されました。")
-            st.write(df.head())  # 最初の数行を出力
-
-        # 最新のデータを取得
-        if not df.empty:
-            latest_row = df.iloc[-1]
-            previous_close = df['Close'].iloc[-2] if len(df) > 1 else latest_row['Close']
-            latest_data = latest_data.append({
-                '銘柄名': symbol,
-                '日付': df.index[-1].strftime('%Y-%m-%d'),
-                '始値': latest_row['Open'],
-                '高値': latest_row['High'],
-                '安値': latest_row['Low'],
-                '終値': latest_row['Close'],
-                '前日比': latest_row['Close'] - previous_close,
-                '出来高': latest_row['Volume']
-            }, ignore_index=True)
-
-    except Exception as e:
-        st.sidebar.text(f"エラー: {symbol} - {str(e)}")
-
-# ... (プロットチャート関数と表示モードの設定は変更なし)
-
-# 最新の株価データの表を表示
-st.table(latest_data)
-
+        latest_data = pd.concat([latest_data, new_row], ignore_index=True)
 
 
 def plot_chart(ax, symbol, period, time_frame, moving_averages):
