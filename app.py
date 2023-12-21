@@ -13,6 +13,8 @@ font_prop = fm.FontProperties(fname=font_path)
 plt.rcParams['font.family'] = 'Meiryo'
 
 # Streamlit UI
+#test
+
 st.title('Stock9_Chart')
 
 def get_stock_data(symbol, period, time_frame):
